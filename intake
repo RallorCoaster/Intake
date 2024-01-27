@@ -1,0 +1,84 @@
+package frc.robot.subsystems;
+
+import edu.wpi.first.wpilibj2.command.Command;
+//import edu.wpi.first.wpilibj2.command.Commands;
+
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+
+import edu.wpi.first.wpilibj.AnalogInput;
+import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.PneumaticsModuleType;
+import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
+import edu.wpi.first.wpilibj.Joystick;
+//import edu.wpi.first.wpilibj2.command.button.Trigger;
+//import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+
+public class Intake extends SubsystemBase {
+    public TalonSRX motor;
+    public DoubleSolenoid solenoid;
+    public AnalogInput sensor1;
+    public AnalogInput sensor2;
+
+    Joystick leftJoystick = new Joystick(0);
+    Joystick rightJoystick = new Joystick(1);
+
+    public Intake()
+    {
+        motor = new TalonSRX(16);
+        solenoid = new DoubleSolenoid(19, PneumaticsModuleType.REVPH, 3, 6);
+        sensor1 = new AnalogInput(2);
+        sensor2 = new AnalogInput(3);
+
+        setDefaultCommand(defaultCommand());
+    }
+
+    public Command defaultCommand()
+    {
+        return run(() -> {
+        motor.set(ControlMode.PercentOutput, 0);
+                solenoid.set(Value.kReverse);
+        });
+    }
+
+    public void slow()
+    {
+        
+      motor.set(ControlMode.PercentOutput, -.5);
+        
+    }
+
+    public void fast()
+    {
+        motor.set(ControlMode.PercentOutput, -1);
+    }
+
+    //Runs until command is finished or condition is met 
+    //and then goes back to default command. 
+    public Command intake()
+    {
+        return run(
+            () -> {
+                solenoid.set(Value.kForward);
+                motor.set(ControlMode.PercentOutput, 1);
+            }
+            ).until(() -> !(sensor1.getValue() >= 50 && sensor2.getValue() >= 50));
+    }
+
+    public Command slowShoot()
+    {
+        return run(() -> {
+            slow();   
+        });
+    }
+
+    public Command fastShoot()
+    {
+        return run(() -> {
+            fast();   
+        });
+    }
+    
+}
